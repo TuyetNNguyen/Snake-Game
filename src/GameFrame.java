@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.io.Serial;
 
 /**
@@ -17,10 +18,13 @@ public class GameFrame extends JFrame {
         // Create a new GamePanel
         GamePanel panel = new GamePanel();
 
-        // Add the GamePanel to the frame
-        this.add(panel);
+        // Set the layout manager to BorderLayout
+        setLayout(new BorderLayout());
 
-        // Set the title of the frame to "snake"
+        // Add the GamePanel to the center of the frame
+        this.add(panel, BorderLayout.CENTER);
+
+        // Set the title of the frame to "Snake game"
         this.setTitle("Snake game");
 
         // Set the default close operation to exit on close
@@ -39,4 +43,3 @@ public class GameFrame extends JFrame {
         this.setLocationRelativeTo(null);
     }
 }
-

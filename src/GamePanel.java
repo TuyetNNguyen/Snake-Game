@@ -2,94 +2,88 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.Serial;
+import java.awt.event.KeyAdapter;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
 
-    @Serial
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 1L;
+    private static final int WIDTH = 500;
+    private static final int HEIGHT = 500;
+    private static final int UNIT_SIZE = 20;
+    private static final int NUMBER_OF_UNITS = (WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE);
 
-    static final int WIDTH = 500;
-    static final int HEIGHT = 500;
-    static final int UNIT_SIZE = 20;
-    static final int NUMBER_OF_UNITS = (WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE);
+    private final int[] x = new int[NUMBER_OF_UNITS];
+    private final int[] y = new int[NUMBER_OF_UNITS];
+    private int length = 5;
+    private int foodEaten;
+    private int foodX;
+    private int foodY;
+    private Direction direction = Direction.RIGHT;
+    private boolean running = false;
+    private final Random random = new Random();
+    private final Timer timer;
 
-    // Snake's body x & y coordinators
-    final int[] x = new int[NUMBER_OF_UNITS];
-    final int[] y = new int[NUMBER_OF_UNITS];
-
-    // Init snake length
-    int length = 5;
-    int foodEaten;
-    int foodX;
-    int foodY;
-    char direction = 'D';
-    boolean running = false;
-    Random random;
-    Timer timer;
-
-    public GamePanel(){
-        random = new Random();
+    public GamePanel() {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setBackground(Color.DARK_GRAY);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
         play();
-    }
-
-    private void play(){
-        addFood();
-        running = true;
-
         timer = new Timer(80, this);
         timer.start();
     }
 
-    public void paintComponent(Graphics graphics){
+    private void play() {
+        addFood();
+        running = true;
+    }
+
+    public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
         draw(graphics);
     }
 
-    private void move(){
-        for (int i = length; i>0; i--){
-            // Shift the snake one unit to the desired direction to create a move
-            x[i] = x[i-1];
-            y[i] = y[i-1];
+    private void move() {
+        for (int i = length; i > 0; i--) {
+            x[i] = x[i - 1];
+            y[i] = y[i - 1];
         }
 
-        if(direction == 'L') {
-            x[0] = x[0] - UNIT_SIZE;
-        } else if(direction == 'R'){
-            x[0] = x[0] + UNIT_SIZE;
-        } else if(direction == 'U'){
-            y[0] = y[0] - UNIT_SIZE;
-        } else {
-            y[0] = y[0] + UNIT_SIZE;
+        switch (direction) {
+            case LEFT:
+                x[0] -= UNIT_SIZE;
+                break;
+            case RIGHT:
+                x[0] += UNIT_SIZE;
+                break;
+            case UP:
+                y[0] -= UNIT_SIZE;
+                break;
+            case DOWN:
+                y[0] += UNIT_SIZE;
+                break;
         }
     }
 
-    private void checkFood(){
-        if(x[0] == foodX && y[0] == foodY) {
+    private void checkFood() {
+        if (x[0] == foodX && y[0] == foodY) {
             length++;
             foodEaten++;
             addFood();
         }
     }
 
-
-    private void draw(Graphics graphics){
-
-        if (running){
+    private void draw(Graphics graphics) {
+        if (running) {
             graphics.setColor(new Color(210, 115, 90));
             graphics.fillOval(foodX, foodY, UNIT_SIZE, UNIT_SIZE);
 
             graphics.setColor(Color.white);
             graphics.fillRect(x[0], y[0], UNIT_SIZE, UNIT_SIZE);
 
-            for(int i = 1; i < length; i++){
+            for (int i = 1; i < length; i++) {
                 graphics.setColor(new Color(40, 200, 150));
                 graphics.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
             }
@@ -104,30 +98,27 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void addFood() {
-        foodX = random.nextInt((int)(WIDTH / UNIT_SIZE))*UNIT_SIZE;
-        foodY = random.nextInt((int)(HEIGHT / UNIT_SIZE))*UNIT_SIZE;
+        foodX = random.nextInt((int) (WIDTH / UNIT_SIZE)) * UNIT_SIZE;
+        foodY = random.nextInt((int) (HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
     }
 
-    private void checkHit(){
-        // check if head run into the body
+    private void checkHit() {
         for (int i = length; i > 0; i--) {
             if (x[0] == x[i] && y[0] == y[i]) {
                 running = false;
             }
         }
 
-        // check if head run into walls
-        if(x[0] < 0 || x[0] > WIDTH || y[0] < 0 || y[0] > HEIGHT) {
+        if (x[0] < 0 || x[0] > WIDTH || y[0] < 0 || y[0] > HEIGHT) {
             running = false;
         }
 
-        if(!running) {
+        if (!running) {
             timer.stop();
         }
     }
 
-
-    private void gameOver(Graphics graphics){
+    private void gameOver(Graphics graphics) {
         graphics.setColor(Color.red);
         graphics.setFont(new Font("Sans serif", Font.ROMAN_BASELINE, 50));
         FontMetrics metrics = getFontMetrics(graphics.getFont());
@@ -136,12 +127,12 @@ public class GamePanel extends JPanel implements ActionListener {
         graphics.setColor(Color.white);
         graphics.setFont(new Font("Sans serif", Font.ROMAN_BASELINE, 25));
         metrics = getFontMetrics(graphics.getFont());
-        graphics.drawString("Score" + foodEaten, (WIDTH - metrics.stringWidth("Score" + foodEaten)) / 2,graphics.getFont().getSize());
+        graphics.drawString("Score" + foodEaten, (WIDTH - metrics.stringWidth("Score" + foodEaten)) / 2, graphics.getFont().getSize());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(running){
+        if (running) {
             move();
             checkFood();
             checkHit();
@@ -149,37 +140,35 @@ public class GamePanel extends JPanel implements ActionListener {
         repaint();
     }
 
-
-    public class MyKeyAdapter extends KeyAdapter {
-
+    private class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                    if (direction != 'R') {
-                        direction = 'L';
+                    if (direction != Direction.RIGHT) {
+                        direction = Direction.LEFT;
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if (direction != 'L') {
-                        direction = 'R';
+                    if (direction != Direction.LEFT) {
+                        direction = Direction.RIGHT;
                     }
                     break;
                 case KeyEvent.VK_UP:
-                    if (direction != 'D') {
-                        direction = 'U';
+                    if (direction != Direction.DOWN) {
+                        direction = Direction.UP;
                     }
                     break;
                 case KeyEvent.VK_DOWN:
-                    if (direction != 'U') {
-                        direction = 'D';
+                    if (direction != Direction.UP) {
+                        direction = Direction.DOWN;
                     }
                     break;
             }
         }
     }
 
+    private enum Direction {
+        UP, DOWN, LEFT, RIGHT
+    }
 }
-
-
-
